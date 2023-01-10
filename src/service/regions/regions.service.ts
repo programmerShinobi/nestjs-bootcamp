@@ -7,7 +7,7 @@ import { Regions } from '../../../entities/Regions';
 export class RegionsService {
     constructor(
         @InjectRepository(Regions) // @ : decorator
-        private regionRepository: Repository<Regions>,
+        private regionRepository: Repository<Regions>
     ) {}
 
     async findAll(): Promise<any> { // Promise<any> is collection, not data type, because use async await
@@ -18,23 +18,37 @@ export class RegionsService {
        return await this.regionRepository.findOneBy({regionId:id})
     }
 
-    async create(items: Regions): Promise<any>  {
-        await this.regionRepository.save({
-            regionId: items.regionId,
-            regionName: items.regionName
-        });
-        return "Data inserted";
+    async create(data: Regions): Promise<any>  {
+
+        // Create a new region object
+        const newRegion = new Regions();
+        newRegion.regionId = data.regionId;
+        newRegion.regionName = data.regionName;
+
+        // Save the new region object to the database
+        await this.regionRepository.save(newRegion);
+
+        // Return the saved user object
+        return newRegion;
     }
 
     async update(id: number, data: Regions): Promise<any>{
-        await this.regionRepository.update(
-            { regionId: id },
-            { regionName: data.regionName });
-        return "Data updated";
+        
+        // Update a region object
+        const regionUpdate = new Regions();
+        regionUpdate.regionName = data.regionName;
+
+        // Update the new region object to the database
+        await this.regionRepository.update({ regionId: id },regionUpdate);
+        
+        // Return the updated user object
+        return regionUpdate;
     }
 
     async delete(id: number): Promise<any> {
         await this.regionRepository.delete({ regionId: id });
-        return "Data deleted";
+        
+        // Return the updated region object
+        return `Data Region with ID : ${id} deleted`;
     }
 }

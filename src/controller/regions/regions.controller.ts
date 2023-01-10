@@ -26,7 +26,7 @@ export class RegionsController {
     }
     
     @Delete(':id')
-    remove(@Param('id') id: number, @Body() body: any) {
+    remove(@Param('id') id: number) {
       return this.RegionsService.delete(id);
     }
 
