@@ -1,12 +1,14 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, CanActivate, ExecutionContext, } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from 'entities/Users';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+// import { JwtAuthGuard } from '@nestjs/jwt'
+// import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements CanActivate {
     constructor(
         @InjectRepository(Users)
         private userRepository: Repository<Users>
@@ -29,13 +31,18 @@ export class AuthService {
                     const payload = {
                         userId: user.id,
                         username: user.username,
+                        password: user.password,
                         userFirstname: user.userFirstname,
                         userMiddlename: user.userMiddlename,
                         userLastname: user.userLastname,
                         userEmail: user.userEmail
                     };
         
-                    const token = await jwt.sign(payload, process.env.SECRET_KEY);
+                    const token = await jwt.sign(
+                        payload,
+                        process.env.SECRET_KEY,
+                        {expiresIn: '2m'}
+                    );
                     res.status(HttpStatus.OK).send({
                         message: "User login successfully",
                         userdata: payload,
@@ -47,6 +54,18 @@ export class AuthService {
         });
         return
         
+    }
+
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        const request = context.switchToHttp().getRequest();
+        const token = request.headers.authorization;
+        try {
+            const decoded = jwt.verify(token, process.env.SECRET_KEY);
+            request.userData = decoded;
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
 
