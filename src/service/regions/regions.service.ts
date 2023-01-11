@@ -11,7 +11,12 @@ export class RegionsService {
     ) {}
 
     async findAll(): Promise<any> { // Promise<any> is collection, not data type, because use async await
-        return await this.regionRepository.find();
+        // return await this.regionRepository.find();
+        return await this.regionRepository
+            .query(`
+                SELECT * FROM regions
+                ORDER BY region_id DESC
+            `);
     }
 
     async findOne(id): Promise<any> {
