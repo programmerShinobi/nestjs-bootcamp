@@ -19,12 +19,12 @@ export class RegionsService {
             `).then((result) => {
                 if (result) {
                     res.status(HttpStatus.OK).send({
-                        message: "Data displayed successfully",
+                        message: "Data regions displayed successfully",
                         results: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_FOUND).send({
-                        message: "Data not found"
+                        message: "Data regions not found"
                     });
                 }
             }).catch((err) => {
@@ -34,17 +34,17 @@ export class RegionsService {
             });
     }
 
-    async findOne(id, req: any, res: any): Promise<any> {
+    async findOne(id: number, req: any, res: any): Promise<any> {
         return await this.regionRepository.findOneBy({ regionId: id })
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.OK).send({
-                        message: "Data displayed successfully",
+                        message: "Data region displayed successfully",
                         results: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_FOUND).send({
-                        message: "Data not found"
+                        message: "Data region not found"
                     })
                 }
             }).catch((err) => {
@@ -66,12 +66,12 @@ export class RegionsService {
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.ACCEPTED).send({
-                        message: "Data inserted successfully",
+                        message: "Data region inserted successfully",
                         results: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_ACCEPTABLE).send({
-                        message: "Data insert failed"
+                        message: "Data region insert failed"
                     })
                 }
             }).catch((err) => {
@@ -95,12 +95,12 @@ export class RegionsService {
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.ACCEPTED).send({
-                        message: "Data updated successfully",
+                        message: "Data region updated successfully",
                         result: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_ACCEPTABLE).send({
-                        message: "Data update failed"
+                        message: "Data region update failed"
                     });
                 }
             }).catch((err) => {
@@ -119,11 +119,11 @@ export class RegionsService {
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.OK).send({
-                        message: `Data Region with ID : ${id} deleted`
+                        message: `Data region with ID : ${id} deleted`
                     });
                 } else {
                     res.status(HttpStatus.NOT_FOUND).send({
-                        message: `Data Region with ID : ${id} not found`
+                        message: `Data region with ID : ${id} not found`
                     })
                 }
             }).catch((err) => {

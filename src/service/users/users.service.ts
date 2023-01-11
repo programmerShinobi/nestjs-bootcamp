@@ -21,12 +21,12 @@ export class UsersService {
             `).then((result) => {
                 if (result) {
                     res.status(HttpStatus.OK).send({
-                        message: "Data displayed successfully",
+                        message: "Data users displayed successfully",
                         results: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_FOUND).send({
-                        message: "Data not found"
+                        message: "Data users not found"
                     });
                 }
 
@@ -37,17 +37,17 @@ export class UsersService {
             });
     }  
 
-    async findOne(id, req: any, res:any): Promise<any> {
+    async findOne(id:number, req: any, res:any): Promise<any> {
         return await this.userRepository.findOneBy({ userId: id })
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.OK).send({
-                    message: `Data wiht ID : ${id} displayed successfully`,
+                    message: `Data user wiht ID : ${id} displayed successfully`,
                     result: result
                 });
                 } else {
                     res.status(HttpStatus.NOT_FOUND).send({
-                    message: `Data wiht ID : ${id} not found`
+                    message: `Data user wiht ID : ${id} not found`
                 });
                 }
                 
@@ -74,13 +74,13 @@ export class UsersService {
         await this.userRepository.save(newUser)
             .then((result) => {
                 if (result) {
-                    res.status(HttpStatus.ACCEPTED).send({
-                        message: "Data inserted successfully",
+                    return res.status(HttpStatus.ACCEPTED).send({
+                        message: "Data user inserted successfully",
                         results: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_ACCEPTABLE).send({
-                        message: "Data insert failed"
+                        message: "Data user insert failed"
                     });
                 }
             }).catch((err) => {
@@ -111,12 +111,12 @@ export class UsersService {
             .then((result) => {
                 if (result) {
                     res.status(HttpStatus.ACCEPTED).send({
-                        message: "Data updated successfully",
+                        message: "Data user updated successfully",
                         result: result
                     });
                 } else {
                     res.status(HttpStatus.NOT_ACCEPTABLE).send({
-                        message: "Data update failed"
+                        message: "Data user update failed"
                     })
                 }
                 
@@ -125,32 +125,26 @@ export class UsersService {
                     message: err.message
                 });
             });
-        
-        // Return the updated user object
-        return
-    }
-
-    async delete(id: number, req: any, res: any): Promise < any > {
-        await this.userRepository.delete({ userId: id })
-            .then((result) => {
-                if (result) {
-                    res.status(HttpStatus.OK).send({
-                        message: `Data User with ID : ${id} deleted successfully`
-                    });
-                } else {
-                    res.status(HttpStatus.NOT_FOUND).send({
-                        message: `Data User with ID : ${id} not found`
-                    })
-                }
-            }).catch((err) => {
-                res.status(HttpStatus.BAD_GATEWAY).send({
-                    message: err.message
-                })
-            });
-        
-        // Return the delted user object
         return;
     }
 
+    async delete(id: number, req: any, res: any): Promise<any> {
+            await this.userRepository.delete({ userId: id })
+                .then((result) => {
+                    if (result) {
+                        res.status(HttpStatus.OK).send({
+                            message: `Data User with ID : ${id} deleted successfully`
+                        });
+                    } else {
+                        res.status(HttpStatus.NOT_FOUND).send({
+                            message: `Data User with ID : ${id} not found`
+                        })
+                    }
+                }).catch((err) => {
+                    res.status(HttpStatus.BAD_GATEWAY).send({
+                        message: err.message
+                    })
+                });
+    }
 
 }
