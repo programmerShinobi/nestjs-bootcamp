@@ -20,16 +20,15 @@ export class AuthService implements CanActivate {
     }
 
     async login(data: Users, req:any, res: any): Promise<Users>{
-        await this.findUsername(req.username).then(async (user) => {
-            if (!user) {
-                res.status(HttpStatus.NOT_FOUND).send("Invalid username");
-            } else {
+        await this.findUsername(data.username).then(async (user) => {
+            if (user.username == data.username) {
                 const compare = await bcrypt.compare(data.password, user.password);
                 if (!compare) {
-                    res.status(HttpStatus.NOT_FOUND).send("Invalid password")
+                    res.status(HttpStatus.NOT_FOUND).send({
+                        message: "Invalid password"})
                 } else {
                     const payload = {
-                        userId: user.id,
+                        userId: user.userId,
                         username: user.username,
                         password: user.password,
                         userFirstname: user.userFirstname,
@@ -49,11 +48,13 @@ export class AuthService implements CanActivate {
                         _token: token
                     })
                 }
-    
-            }
+            }            
+        }).catch(() => {
+            res.status(HttpStatus.NOT_FOUND).send({
+                message: "Invalid username"
+            })
         });
         return
-        
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

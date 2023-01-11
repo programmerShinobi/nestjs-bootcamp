@@ -1,8 +1,12 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { Req, Res } from '@nestjs/common/decorators';
 import { UsersService } from 'src/service/users/users.service';
+import { UseGuards } from '@nestjs/common/decorators';
 import { AuthService } from 'src/service/auth/auth.service';
+// import { AuthService } from 'src/service/auth/auth.service';
 
+
+@UseGuards(AuthService)
 @Controller()
 export class UsersController {
     constructor(private UsersService: UsersService,
