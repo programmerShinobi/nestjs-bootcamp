@@ -4,6 +4,7 @@ import { Users } from 'entities/Users';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 // import { JwtAuthGuard } from '@nestjs/jwt'
 // import { AuthGuard } from '@nestjs/passport';
 
@@ -21,7 +22,7 @@ export class AuthService implements CanActivate {
 
     async login(data: Users, req:any, res: any): Promise<Users>{
         await this.findUsername(data.username).then(async (user) => {
-            if (user.username == data.username) {
+            // if (user.username == data.username) {
                 const compare = await bcrypt.compare(data.password, user.password);
                 if (!compare) {
                     res.status(HttpStatus.NOT_FOUND).send({
@@ -48,12 +49,13 @@ export class AuthService implements CanActivate {
                         _token: token
                     })
                 }
-            }            
-        }).catch(() => {
-            res.status(HttpStatus.NOT_FOUND).send({
-                message: "Invalid username"
-            })
-        });
+            // }            
+        })
+        //     .catch(() => {
+        //     res.status(HttpStatus.NOT_FOUND).send({
+        //         message: "Invalid username"
+        //     })
+        // });
         return
     }
 

@@ -4,7 +4,9 @@ import { Repository } from 'typeorm';
 import { Users } from 'entities/Users';
 import * as bcrypt from 'bcrypt';
 import { HttpStatus } from '@nestjs/common/enums';
-
+import { NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common/exceptions';
+import { IsNumber, isNumber } from 'class-validator';
 @Injectable()
 export class UsersService {
     constructor(
@@ -31,7 +33,7 @@ export class UsersService {
                 }
 
             }).catch((err) => {
-                res.status(HttpStatus.BAD_GATEWAY).send({
+                res.status(HttpStatus.BAD_REQUEST).send({
                     message: err.message
                 });
             });
@@ -52,99 +54,115 @@ export class UsersService {
                 }
                 
             }).catch((err) => {
-                res.status(HttpStatus.BAD_GATEWAY).send({
+                res.status(HttpStatus.BAD_REQUEST).send({
                 message: err.message
         })}) 
     }
 
-    async create(data: Users, req: any, res:any): Promise<Users> {
+    async create(data: Users, req: any, res: any): Promise<Users> {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(data.password, salt);
-
-        // Save a user object
-        const newUser = new Users();
-        newUser.username = data.username;
-        newUser.password = hashedPassword;
-        newUser.userFirstname = data.userFirstname;
-        newUser.userMiddlename = data.userMiddlename;
-        newUser.userLastname = data.userLastname;
-        newUser.userEmail = data.userEmail;
     
-        // Save the new user object to the database
-        await this.userRepository.save(newUser)
-            .then((result) => {
-                if (result) {
-                    return res.status(HttpStatus.ACCEPTED).send({
-                        message: "Data user inserted successfully",
-                        results: result
-                    });
-                } else {
-                    res.status(HttpStatus.NOT_ACCEPTABLE).send({
-                        message: "Data user insert failed"
-                    });
-                }
-            }).catch((err) => {
-                res.status(HttpStatus.BAD_REQUEST).send({
-                    message: err.message
+        return await this.userRepository.save({
+            username : data.username,
+            password : hashedPassword,
+            userFirstname : data.userFirstname,
+            userMiddlename : data.userMiddlename,
+            userLastname : data.userLastname,
+            userEmail : data.userEmail,
+        }).then((result) => {
+            if (result) {
+                return res.status(HttpStatus.OK).send({
+                    message: "Data user inserted successfully",
+                    results: result
                 });
+            } else {
+                res.status(HttpStatus.EXPECTATION_FAILED).send({
+                    message: "Data user insert failed"
+                });
+            }
+        }).catch((err) => {
+            res.status(HttpStatus.BAD_REQUEST).send({
+                message: err.message
             });
-
-        // Return the saved user object
-        return;
+        });
     }
 
-    async update(id: number, data: Users, req: any, res: any): Promise<any>{
-        const salt = await bcrypt.genSalt();
-        const hashedPassword = await bcrypt.hash(data.password, salt);
-
+    async update(id: number, data: Users, req: any, res:any): Promise<any>{
+        
         // Update a user object with the hashed password
-        const userUpdate = new Users();
-        userUpdate.username = data.username;
-        userUpdate.password = hashedPassword;
-        userUpdate.userFirstname = data.userFirstname;
-        userUpdate.userMiddlename = data.userMiddlename;
-        userUpdate.userLastname = data.userLastname;
-        userUpdate.userEmail = data.userEmail;
-    
-        // Update the new user object to the database
-        await this.userRepository.update({ userId: id }, userUpdate)
-            .then((result) => {
-                if (result) {
-                    res.status(HttpStatus.ACCEPTED).send({
-                        message: "Data user updated successfully",
-                        result: result
-                    });
-                } else {
-                    res.status(HttpStatus.NOT_ACCEPTABLE).send({
-                        message: "Data user update failed"
-                    })
-                }
-                
-            }).catch((err) => {
-                res.status(HttpStatus.BAD_REQUEST).send({
-                    message: err.message
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(data.password, salt);
+
+        await this.userRepository.update(id,{
+            username : data.username,
+            password : hashedPassword,
+            userFirstname : data.userFirstname,
+            userMiddlename : data.userMiddlename,
+            userLastname : data.userLastname,
+            userEmail : data.userEmail,
+        })
+        .then(async (result) => {
+            if (result) {
+                let dataUpdated = await this.userRepository.findOneBy({ userId: id });
+                return res.status(HttpStatus.OK).send({
+                    message: "Data user updated successfully",
+                    results: dataUpdated
                 });
+            } else {
+                return res.status(HttpStatus.EXPECTATION_FAILED).send({
+                    message: "Data user update failed"
+                });
+            }
+        })
+        .catch((err) => {
+            return res.status(HttpStatus.BAD_REQUEST).send({
+                message: err.message
             });
-        return;
+        });;
     }
 
-    async delete(id: number, req: any, res: any): Promise<any> {
-            await this.userRepository.delete({ userId: id })
-                .then((result) => {
-                    if (result) {
-                        res.status(HttpStatus.OK).send({
-                            message: `Data User with ID : ${id} deleted successfully`
-                        });
-                    } else {
-                        res.status(HttpStatus.NOT_FOUND).send({
-                            message: `Data User with ID : ${id} not found`
-                        })
-                    }
-                }).catch((err) => {
-                    res.status(HttpStatus.BAD_GATEWAY).send({
-                        message: err.message
-                    })
-                });
+    // async delete(id: number, req: any, res: any): Promise<any> {
+    //     let resultDelete = await this.userRepository.findOneBy({ userId: id })
+        
+    //     if (!resultDelete) {
+    //         throw new NotFoundException(`Data user with ID: ${id} not found`);
+    //     }
+        
+    //     await this.userRepository.delete({ userId: id })
+    //         .then((result) => {
+    //             if (result) {
+    //                 res.status(HttpStatus.OK).send({
+    //                     message: `Data user with ID : ${id} deleted successfully`
+    //                 });
+    //             } else {
+    //                 res.status(HttpStatus.NOT_FOUND).send({
+    //                     message: `Data user with ID : ${id} not found`
+    //                 })
+    //             }
+    //         }).catch((err) => {
+    //             res.status(HttpStatus.BAD_REQUEST).send({
+    //                 message: err.message
+    //             })
+    //         });
+    //     return
+    // }
+    
+    async delete(id: number): Promise<any> {
+        
+        if (!isNumber(id)) {
+            throw new BadRequestException(`Data with ID: ${id} must be number`);
+        }
+
+        let findId = await this.userRepository.findOneBy({ userId: id })
+        if (!findId) {
+            throw new NotFoundException(`Data user with ID: ${id} not found`);
+        }        
+
+        let deleteData = await this.userRepository.delete({ userId: id });
+        return deleteData;
     }
+
+
 
 }

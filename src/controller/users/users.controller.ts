@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Req, Res } from '@nestjs/common/decorators';
 import { UsersService } from 'src/service/users/users.service';
 import { UseGuards } from '@nestjs/common/decorators';
@@ -6,7 +6,7 @@ import { AuthService } from 'src/service/auth/auth.service';
 // import { AuthService } from 'src/service/auth/auth.service';
 
 
-@UseGuards(AuthService)
+// @UseGuards(AuthService)
 @Controller()
 export class UsersController {
     constructor(private UsersService: UsersService,
@@ -29,13 +29,19 @@ export class UsersController {
     }
 
     @Put('users/:id')
+    @UsePipes(new ValidationPipe({ transform: true }))
     update(@Param('id') id: number, @Body() body: any, @Req() req, @Res() res) {
         return this.UsersService.update(id, body, req, res)
     }
 
+    // @Delete('users/:id')
+    // remove(@Param('id') id: number, @Req() req, @Res() res) {
+    //     return this.UsersService.delete(id, req, res);
+    // }
+
     @Delete('users/:id')
-    remove(@Param('id') id: number, @Req() req, @Res() res) {
-        return this.UsersService.delete(id, req, res);
+    remove(@Param('id') id: number ) {
+        return this.UsersService.delete(id);
     }
 
     // @Post('/login')
