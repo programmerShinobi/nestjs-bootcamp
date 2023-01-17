@@ -6,7 +6,8 @@ import * as bcrypt from 'bcrypt';
 import { HttpStatus } from '@nestjs/common/enums';
 import { NotFoundException } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common/exceptions';
-import { IsNumber, isNumber } from 'class-validator';
+import { formsUsers } from 'pipes/validation.pipe';
+import { IsEmail, IsEmpty, IsNumber, isNumber } from 'class-validator';
 @Injectable()
 export class UsersService {
     constructor(
@@ -94,7 +95,7 @@ export class UsersService {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(data.password, salt);
 
-        await this.userRepository.update(id,{
+        await this.userRepository.update(id, {
             username : data.username,
             password : hashedPassword,
             userFirstname : data.userFirstname,
@@ -119,7 +120,7 @@ export class UsersService {
             return res.status(HttpStatus.BAD_REQUEST).send({
                 message: err.message
             });
-        });;
+        });
     }
 
     // async delete(id: number, req: any, res: any): Promise<any> {
@@ -149,20 +150,23 @@ export class UsersService {
     // }
     
     async delete(id: number): Promise<any> {
-        
-        if (!isNumber(id)) {
-            throw new BadRequestException(`Data with ID: ${id} must be number`);
+        if (isNumber(id)) {
+            let findId = await this.userRepository.findOneBy({ userId: id })
+            if (!findId) {
+                throw new NotFoundException(`Data user with ID: ${id} not found`);
+            }        
+        } else {
+            throw new BadRequestException(`Data with ID: ${id} must be number`+isNumber(id));
         }
-
-        let findId = await this.userRepository.findOneBy({ userId: id })
-        if (!findId) {
-            throw new NotFoundException(`Data user with ID: ${id} not found`);
-        }        
 
         let deleteData = await this.userRepository.delete({ userId: id });
         return deleteData;
     }
 
-
+    async login(data: Users) {
+        await this.findEmail(data.userEmail).then(async (user) => {
+            // const compare = await bcrypt.compare()
+        })
+    }
 
 }

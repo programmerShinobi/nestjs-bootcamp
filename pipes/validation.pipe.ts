@@ -1,12 +1,18 @@
 import { UsePipes, ValidationPipe } from '@nestjs/common';
 import { validate } from 'class-validator';
-import { IsEmail, IsString, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class formsUsers {
-    @IsEmail()
-    email: string;
+    @IsNumber()
+    userId: number;
 
     @IsNotEmpty()
-    password: string;
     username: string;
+    password: string;
+    userFirstname: string;
+    userMiddlename: string;
+    userLastname: string;
+
+    @IsEmail()
+    userEmail: string
 }
